@@ -3,6 +3,8 @@ using BrokerRequests;
 using ClientSide.Commands.Libraries;
 using ClientSide.Validation.Libraries;
 using MassTransit;
+using Microsoft.Extensions.DependencyInjection;
+using ServerSide.Commands.Libraries;
 
 namespace ClientSide
 {
@@ -17,7 +19,12 @@ namespace ClientSide
             builder.Services.AddControllers();
 
             builder.Services.AddTransient<ICreateLibraryRequestValidator, CreateLibraryRequestValidator>();
+            builder.Services.AddTransient<IUpdateLibraryRequestValidator, UpdateLibraryRequestValidator>();
+            builder.Services.AddTransient<IDeleteLibraryRequestValidator, DeleteLibraryRequestValidator>();
             builder.Services.AddTransient<ICreateLibraryCommand, CreateLibraryCommand>();
+            builder.Services.AddTransient<IUpdateLibraryCommand, UpdateLibraryCommand>();
+            builder.Services.AddTransient<IDeleteLibraryCommand, DeleteLibraryCommand>();
+            builder.Services.AddTransient<IReadLibraryCommand, ReadLibraryCommand>();
 
             builder.Services.AddMassTransit( mt =>
             {
@@ -44,10 +51,12 @@ namespace ClientSide
 
             // Configure the HTTP request pipeline.
 
-            app.UseAuthorization();
+            app.UseRouting();
 
-
-            app.MapControllers();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
 
             app.Run();
         }

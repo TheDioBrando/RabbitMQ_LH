@@ -3,6 +3,7 @@ using ClientSide.Validation.Libraries;
 using Broker.Responses;
 using Broker.Requests;
 using MassTransit;
+using System.Runtime.CompilerServices;
 
 namespace ClientSide.Commands.Libraries
 {
@@ -14,11 +15,11 @@ namespace ClientSide.Commands.Libraries
     public class CreateLibraryCommand : ICreateLibraryCommand
     {
         private IRequestClient<CreateLibraryRequest> _requestClient;
-        private CreateLibraryRequestValidator _validator;
+        private ICreateLibraryRequestValidator _validator;
 
         public CreateLibraryCommand(
             IRequestClient<CreateLibraryRequest> requestClient, 
-            CreateLibraryRequestValidator validator)
+            ICreateLibraryRequestValidator validator)
         {
             _requestClient = requestClient;
             _validator = validator;
@@ -38,7 +39,7 @@ namespace ClientSide.Commands.Libraries
                 };
             }
 
-            return _requestClient.GetResponse<CreateLibraryResponse>(request).Result.Message;
+            return (await _requestClient.GetResponse<CreateLibraryResponse>(request)).Message;
         }
     }
 }

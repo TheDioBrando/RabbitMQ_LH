@@ -1,9 +1,9 @@
 using ServerSide.Data;
-using Microsoft.EntityFrameworkCore;
 using MassTransit;
 using ServerSide.Consumers;
 using ServerSide.Mappers;
 using ServerSide.Data.Repositories;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ServerSide
 {
@@ -23,7 +23,11 @@ namespace ServerSide
 
             builder.Services.AddMassTransit(mt =>
             {
-                mt.AddConsumer<PostUserConsumer>();
+                mt.AddConsumer<CreateLibraryConsumer>();
+                mt.AddConsumer<DoesSameLibraryExistConsumer>();
+                mt.AddConsumer<UpdateLibraryConsumer>();
+                mt.AddConsumer<DeleteLibraryConsumer>();
+                mt.AddConsumer<ReadLibraryConsumer>();
 
                 mt.UsingRabbitMq((context, config) =>
                 {
@@ -33,9 +37,8 @@ namespace ServerSide
                         host.Password("guest");
                     });
 
-                    config.ReceiveEndpoint("post", ep => ep.ConfigureConsumer<PostUserConsumer>(context));
-                    config.ReceiveEndpoint("create", ep => ep.ConfigureConsumer<CreateLibraryConsumer>(context));
                     config.ReceiveEndpoint("update", ep => ep.ConfigureConsumer<UpdateLibraryConsumer>(context));
+                    config.ReceiveEndpoint("create", ep => ep.ConfigureConsumer<CreateLibraryConsumer>(context));
                     config.ReceiveEndpoint("delete", ep => ep.ConfigureConsumer<DeleteLibraryConsumer>(context));
                     config.ReceiveEndpoint("read", ep => ep.ConfigureConsumer<ReadLibraryConsumer>(context));
                     config.ReceiveEndpoint("exist", ep => ep.ConfigureConsumer<DoesSameLibraryExistConsumer>(context));

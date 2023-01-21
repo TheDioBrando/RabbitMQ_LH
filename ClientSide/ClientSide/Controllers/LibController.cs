@@ -5,6 +5,7 @@ using ClientSide.Commands.Libraries;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using ServerSide.Commands.Libraries;
 using System.Net;
 
 namespace ClientSide.Controllers
@@ -26,7 +27,7 @@ namespace ClientSide.Controllers
         [HttpPost("create")]
         public async Task<CreateLibraryResponse> Create(
             [FromServices] IRequestClient<CreateLibraryRequest> requestClient,
-            [FromServices] CreateLibraryCommand command,
+            [FromServices] ICreateLibraryCommand command,
             [FromBody] CreateLibraryRequest request)
         {
             var response = await command.Execute(request);
@@ -38,41 +39,49 @@ namespace ClientSide.Controllers
             return response;
         }
 
-        //[HttpPut]
-        //public Task<UpdateLibraryResponse> Update(
-        //    [FromServices] IRequestClient<UpdateLibraryRequest> requestClient,
-        //    [FromBody] UpdateLibraryRequest request)
-        //{
+        [HttpPut]
+        public async Task<UpdateLibraryResponse> Update(
+            [FromServices] IRequestClient<UpdateLibraryRequest> requestClient,
+            [FromServices] IUpdateLibraryCommand command,
+            [FromBody] UpdateLibraryRequest request)
+        {
+            var response = await command.Execute(request);
 
-        //    HttpContext.Response.StatusCode = response.IsSuccess
-        //        ? (int)HttpStatusCode.OK
-        //        : (int)HttpStatusCode.BadRequest;
+            HttpContext.Response.StatusCode = response.IsSuccess
+                ? (int)HttpStatusCode.OK
+                : (int)HttpStatusCode.BadRequest;
 
-        //    return null;
-        //}
+            return response;
+        }
 
-        //[HttpGet]
-        //public Task<ReadLibrariesResponse> Read(
-        //    [FromServices] IRequestClient<ReadLibraryRequest> requestClient,
-        //    [FromBody] ReadLibraryRequest request)
-        //{
-        //    HttpContext.Response.StatusCode = !response.Addresses.IsNullOrEmpty()
-        //        ? (int)HttpStatusCode.OK
-        //        : (int)HttpStatusCode.NoContent;
+        [HttpGet]
+        public async Task<ReadLibrariesResponse> Read(
+            [FromServices] IRequestClient<ReadLibraryRequest> requestClient,
+            [FromServices] IReadLibraryCommand command,
+            [FromBody] ReadLibraryRequest request)
+        {
+            var response = await command.Execute(request);
 
-        //    return null;
-        //}
+            HttpContext.Response.StatusCode = !(response.Addresses.Count == 0)
+                ? (int)HttpStatusCode.OK
+                : (int)HttpStatusCode.NoContent;
 
-        //[HttpDelete]
-        //public Task<DeleteLibraryResponse> Delete(
-        //    [FromServices] IRequestClient<DeleteLibraryRequest> requestClient,
-        //    [FromBody] DeleteLibraryRequest request)
-        //{
-        //    HttpContext.Response.StatusCode = response.IsSuccess
-        //        ? (int)HttpStatusCode.OK
-        //        : (int)HttpStatusCode.BadRequest;
+            return response;
+        }
 
-        //    return null;
-        //}
+        [HttpDelete]
+        public async Task<DeleteLibraryResponse> Delete(
+            [FromServices] IRequestClient<DeleteLibraryRequest> requestClient,
+            [FromServices] IDeleteLibraryCommand command,
+            [FromBody] DeleteLibraryRequest request)
+        {
+            var response = await command.Execute(request);
+
+            HttpContext.Response.StatusCode = response.IsSuccess
+                ? (int)HttpStatusCode.OK
+                : (int)HttpStatusCode.BadRequest;
+
+            return response;
+        }
     }
 }
