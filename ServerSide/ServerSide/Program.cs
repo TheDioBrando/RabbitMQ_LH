@@ -1,3 +1,10 @@
+using ServerSide.Data;
+using Microsoft.EntityFrameworkCore;
+using MassTransit;
+using ServerSide.Consumers;
+using ServerSide.Mappers;
+using ServerSide.Data.Repositories;
+
 namespace ServerSide
 {
     public class Program
@@ -8,16 +15,52 @@ namespace ServerSide
 
             // Add services to the container.
 
-            builder.Services.AddControllers();
+            //builder.Services.AddControllers();
+            builder.Services.AddDbContext<LibDbContext>();
+
+            builder.Services.AddTransient<IDbLibraryMapper, DbLibraryMapper>();
+            builder.Services.AddTransient<ILibraryRepository, LibraryRepository>();
+
+            builder.Services.AddMassTransit(mt =>
+            {
+                mt.AddConsumer<PostUserConsumer>();
+
+                mt.UsingRabbitMq((context, config) =>
+                {
+                    config.Host("localhost", "/", host =>
+                    {
+                        host.Username("guest");
+                        host.Password("guest");
+                    });
+
+                    config.ReceiveEndpoint("post", ep => ep.ConfigureConsumer<PostUserConsumer>(context));
+                    config.ReceiveEndpoint("create", ep => ep.ConfigureConsumer<CreateLibraryConsumer>(context));
+                    config.ReceiveEndpoint("update", ep => ep.ConfigureConsumer<UpdateLibraryConsumer>(context));
+                    config.ReceiveEndpoint("delete", ep => ep.ConfigureConsumer<DeleteLibraryConsumer>(context));
+                    config.ReceiveEndpoint("read", ep => ep.ConfigureConsumer<ReadLibraryConsumer>(context));
+                    config.ReceiveEndpoint("exist", ep => ep.ConfigureConsumer<DoesSameLibraryExistConsumer>(context));
+                }
+                );
+            });
+
+            builder.Services.AddMassTransitHostedService();
 
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
 
-            app.UseAuthorization();
+            using var serviceScope = app.Services
+                .GetRequiredService<IServiceScopeFactory>()
+                .CreateScope();
 
+            using var context = serviceScope.ServiceProvider.GetService<LibDbContext>();
 
-            app.MapControllers();
+            app.UseRouting();
+
+            //app.UseEndpoints(endpoints =>
+            //{
+            //    endpoints.MapControllers();
+            //});
 
             app.Run();
         }
