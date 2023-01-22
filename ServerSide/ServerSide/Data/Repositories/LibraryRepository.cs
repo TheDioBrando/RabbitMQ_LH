@@ -29,7 +29,7 @@ namespace ServerSide.Data.Repositories
         public async Task<Guid> Create(DbLibraries library)
         {
             _context.Libraries.Add(library);
-            _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             return library.Id;
         }
 
@@ -43,7 +43,7 @@ namespace ServerSide.Data.Repositories
             var lib = _context.Libraries.FirstOrDefault(x => x.Address == request.OldAddress);
 
             lib.Address = request.NewAddress;
-            _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
             return lib.Id;
         }
@@ -54,7 +54,7 @@ namespace ServerSide.Data.Repositories
 
             Guid id = lib.Id;
             _context.Libraries.Remove(lib);
-            _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
             return id;
         }

@@ -14,8 +14,6 @@ namespace ServerSide
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-
-            //builder.Services.AddControllers();
             builder.Services.AddDbContext<LibDbContext>();
 
             builder.Services.AddTransient<IDbLibraryMapper, DbLibraryMapper>();
@@ -59,11 +57,6 @@ namespace ServerSide
             using var context = serviceScope.ServiceProvider.GetService<LibDbContext>();
 
             app.UseRouting();
-
-            //app.UseEndpoints(endpoints =>
-            //{
-            //    endpoints.MapControllers();
-            //});
 
             app.Run();
         }
